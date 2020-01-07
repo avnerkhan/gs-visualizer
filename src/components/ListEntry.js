@@ -1,7 +1,12 @@
 export default class ListEntry {
   constructor(id) {
     this.id = id;
+    this.isCurrentPartner = false;
     this.crossedOut = false;
+  }
+
+  isPartner() {
+    return this.isCurrentPartner;
   }
 
   isCrossedOut() {
@@ -10,6 +15,10 @@ export default class ListEntry {
 
   getId() {
     return this.id;
+  }
+
+  setCurrentPartner(partnerStatus) {
+    this.isCurrentPartner = partnerStatus;
   }
 
   crossOut() {

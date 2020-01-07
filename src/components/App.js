@@ -12,6 +12,7 @@ const App = () => {
   const [BEFORE, DURING, AFTER] = [0, 1, 2];
   const [currState, setCurrState] = useState(BEFORE);
   const [nodeCountPerGender, setNodeCountPerGender] = useState(6);
+  const [maleProposalIndex, setMaleProposalIndex] = useState(0);
   const [males, setMales] = useState([]);
   const [females, setFemales] = useState([]);
 
@@ -37,8 +38,10 @@ const App = () => {
       maleList.push(
         new Node(i, createBasicPrefList(), maleXAxis, currentHeightOfNode)
       );
+      let reversedPrefList = createBasicPrefList();
+      reversedPrefList.reverse();
       femaleList.push(
-        new Node(i, createBasicPrefList(), femaleXAxis, currentHeightOfNode)
+        new Node(i, reversedPrefList, femaleXAxis, currentHeightOfNode)
       );
       currentHeightOfNode += nodeDivision;
     }
@@ -47,9 +50,17 @@ const App = () => {
   };
 
   const drawAPrefBox = (p5, prefNode, currX, boxY) => {
+    if (prefNode.isCrossedOut()) {
+      p5.fill(p5.color("red"));
+    } else if (prefNode.isPartner()) {
+      p5.fill(p5.color("green"));
+    } else {
+      p5.fill(p5.color("white"));
+    }
     p5.rect(currX, boxY, boxWidth, boxWidth);
     const boxMiddleX = currX + boxWidth / 2;
     const boxMiddleY = boxY + boxWidth / 2;
+    p5.fill(p5.color("black"));
     p5.text(String(prefNode.getId()), boxMiddleX, boxMiddleY);
   };
 
@@ -75,11 +86,13 @@ const App = () => {
   };
 
   const drawNode = (p5, node) => {
+    p5.fill(p5.color("white"));
     p5.ellipse(node.getX(), node.getY(), nodeDiameter);
+    p5.fill(p5.color("black"));
     p5.text(String(node.getId()), node.getX(), node.getY());
   };
 
-  const drawStartState = p5 => {
+  const drawState = p5 => {
     if (males.length === 0 && females.length === 0) {
       setupStartState(p5.width, p5.height);
     }
@@ -97,22 +110,19 @@ const App = () => {
 
   const drawSketch = p5 => {
     p5.background(0, 196, 255);
-    switch (currState) {
-      case BEFORE:
-        drawStartState(p5);
-        break;
-      case DURING:
-        break;
-      case AFTER:
-        break;
-      default:
-        break;
-    }
+    drawState(p5);
   };
 
   return (
     <div className="App">
       <header className="App-header">
+        <div
+          onClick={() => {
+            setCurrState(DURING);
+          }}
+        >
+          {currState === BEFORE ? "Start" : "Next Iteration"}
+        </div>
         <Sketch
           setup={(p5, parent) => setupSketch(p5, parent)}
           draw={p5 => drawSketch(p5)}

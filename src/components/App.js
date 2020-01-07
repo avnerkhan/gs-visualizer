@@ -5,6 +5,10 @@ import ListEntry from "./ListEntry";
 import "../css/App.css";
 
 const App = () => {
+  const nodeDiameter = 50;
+  const boxWidth = nodeDiameter / 2;
+  const boxDivision = boxWidth * 1.2;
+  const nodeDivision = nodeDiameter * 2;
   const [BEFORE, DURING, AFTER] = [0, 1, 2];
   const [currState, setCurrState] = useState(BEFORE);
   const [nodeCountPerGender, setNodeCountPerGender] = useState(6);
@@ -27,7 +31,6 @@ const App = () => {
     let maleList = [];
     let femaleList = [];
     let currentHeightOfNode = height / nodeCountPerGender;
-    const divisionLength = 100;
     const maleXAxis = width / 4;
     const femaleXAxis = (3 * width) / 4;
     for (let i = 0; i < nodeCountPerGender; i++) {
@@ -37,19 +40,58 @@ const App = () => {
       femaleList.push(
         new Node(i, createBasicPrefList(), femaleXAxis, currentHeightOfNode)
       );
-      currentHeightOfNode += divisionLength;
+      currentHeightOfNode += nodeDivision;
     }
     setMales(maleList);
     setFemales(femaleList);
+  };
+
+  const drawAPrefBox = (p5, prefNode, currX, boxY) => {
+    p5.rect(currX, boxY, boxWidth, boxWidth);
+    const boxMiddleX = currX + boxWidth / 2;
+    const boxMiddleY = boxY + boxWidth / 2;
+    p5.text(String(prefNode.getId()), boxMiddleX, boxMiddleY);
+  };
+
+  const drawPrefList = (p5, node, leftDraw) => {
+    const prefList = node.getPrefList();
+
+    let currBoxX;
+    const boxY = node.getY();
+
+    if (leftDraw) {
+      currBoxX = node.getX() - boxDivision * 2;
+      for (let i = prefList.length - 1; i >= 0; i--) {
+        drawAPrefBox(p5, prefList[i], currBoxX, boxY);
+        currBoxX -= boxDivision;
+      }
+    } else {
+      currBoxX = node.getX() + boxDivision;
+      for (const pref of prefList) {
+        drawAPrefBox(p5, pref, currBoxX, boxY);
+        currBoxX += boxDivision;
+      }
+    }
+  };
+
+  const drawNode = (p5, node) => {
+    p5.ellipse(node.getX(), node.getY(), nodeDiameter);
+    p5.text(String(node.getId()), node.getX(), node.getY());
   };
 
   const drawStartState = p5 => {
     if (males.length === 0 && females.length === 0) {
       setupStartState(p5.width, p5.height);
     }
-    for (const node of [...males, ...females]) {
-      p5.text("Hello", node.getX() - 50, node.getY());
-      p5.ellipse(node.getX(), node.getY(), 50);
+
+    for (const maleNode of males) {
+      drawPrefList(p5, maleNode, true);
+      drawNode(p5, maleNode);
+    }
+
+    for (const femaleNode of females) {
+      drawPrefList(p5, femaleNode, false);
+      drawNode(p5, femaleNode);
     }
   };
 
@@ -58,6 +100,7 @@ const App = () => {
     switch (currState) {
       case BEFORE:
         drawStartState(p5);
+        break;
       case DURING:
         break;
       case AFTER:

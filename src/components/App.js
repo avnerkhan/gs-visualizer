@@ -85,6 +85,42 @@ const App = () => {
     }
   };
 
+  const findAndSetProposal = (maleProposer, proposalId) => {
+    let currentFemales = females;
+    for (let female of currentFemales) {
+      if (female.getId() === proposalId) {
+        try {
+          female.setPartner(maleProposer);
+        } catch {
+          console.log("Partner already set");
+        }
+        setFemales(currentFemales);
+        return female;
+      }
+    }
+  };
+
+  const setProposalStatus = p5 => {
+    if (males.length > 0 && females.length > 0) {
+      let currentMales = males;
+      const proposingMale = currentMales[maleProposalIndex];
+      const proposedFemaleEntry = proposingMale.getFirstAvailable();
+      const proposedFemale = findAndSetProposal(
+        proposingMale,
+        proposedFemaleEntry.id
+      );
+      p5.fill(p5.color("black"));
+      p5.line(
+        proposingMale.getX(),
+        proposingMale.getY(),
+        proposedFemale.getX(),
+        proposedFemale.getY()
+      );
+
+      setMales(currentMales);
+    }
+  };
+
   const drawNode = (p5, node) => {
     p5.fill(p5.color("white"));
     p5.ellipse(node.getX(), node.getY(), nodeDiameter);
@@ -96,6 +132,8 @@ const App = () => {
     if (males.length === 0 && females.length === 0) {
       setupStartState(p5.width, p5.height);
     }
+
+    setProposalStatus(p5);
 
     for (const maleNode of males) {
       drawPrefList(p5, maleNode, true);

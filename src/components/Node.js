@@ -41,6 +41,15 @@ export default class Node {
     }
   }
 
+  setAsCurrentPartnerInList(id) {
+    for (let i = 0; i < this.prefList.length; i++) {
+      if (this.prefList[i].getId() === id) {
+        this.prefList[i].setCurrentPartner(true);
+        break;
+      }
+    }
+  }
+
   getPrefList() {
     return this.prefList;
   }
@@ -49,14 +58,27 @@ export default class Node {
     return this.prefList.indexOf(partner.id);
   }
 
+  // Pretty much a female only method
   setPartner(partner) {
     if (
       this.partner === null ||
       this.getRankInList(partner) > this.getRankInList(this.partner)
     ) {
+      if (this.partner !== null) this.crossFromPrefList(this.partner.id);
       this.partner = partner;
+      this.setAsCurrentPartnerInList(this.partner.id);
     } else {
       throw new Error("Cannot set to a partner of lower preference.");
+    }
+  }
+
+  // Male only method
+  getFirstAvailable() {
+    for (let pref of this.prefList) {
+      if (!pref.isCrossedOut()) {
+        pref.setCurrentPartner(true);
+        return pref;
+      }
     }
   }
 

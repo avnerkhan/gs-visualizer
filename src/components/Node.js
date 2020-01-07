@@ -42,10 +42,14 @@ export default class Node {
   }
 
   setAsCurrentPartnerInList(id) {
+    let idIndex;
     for (let i = 0; i < this.prefList.length; i++) {
       if (this.prefList[i].getId() === id) {
         this.prefList[i].setCurrentPartner(true);
-        break;
+        idIndex = i;
+      } else {
+        this.prefList[i].setCurrentPartner(false);
+        if (i > idIndex) this.prefList[i].crossOut();
       }
     }
   }
@@ -55,21 +59,15 @@ export default class Node {
   }
 
   getRankInList(partner) {
-    return this.prefList.indexOf(partner.id);
+    for (let i = 0; i < this.prefList.length; i++) {
+      if (this.prefList[i].getId() === partner.id) return i;
+    }
   }
 
   // Pretty much a female only method
   setPartner(partner) {
-    if (
-      this.partner === null ||
-      this.getRankInList(partner) > this.getRankInList(this.partner)
-    ) {
-      if (this.partner !== null) this.crossFromPrefList(this.partner.id);
-      this.partner = partner;
-      this.setAsCurrentPartnerInList(this.partner.id);
-    } else {
-      throw new Error("Cannot set to a partner of lower preference.");
-    }
+    this.partner = partner;
+    this.setAsCurrentPartnerInList(this.partner.id);
   }
 
   // Male only method

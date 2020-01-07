@@ -89,12 +89,14 @@ const App = () => {
     let currentFemales = females;
     for (let female of currentFemales) {
       if (female.getId() === proposalId) {
-        try {
+        if (
+          female.getPartner() === null ||
+          female.getRankInList(maleProposer) <
+            female.getRankInList(female.getPartner())
+        ) {
           female.setPartner(maleProposer);
-        } catch {
-          console.log("Partner already set");
+          setFemales(currentFemales);
         }
-        setFemales(currentFemales);
         return female;
       }
     }
@@ -133,7 +135,7 @@ const App = () => {
       setupStartState(p5.width, p5.height);
     }
 
-    setProposalStatus(p5);
+    if (currState === DURING) setProposalStatus(p5);
 
     for (const maleNode of males) {
       drawPrefList(p5, maleNode, true);
@@ -156,7 +158,12 @@ const App = () => {
       <header className="App-header">
         <div
           onClick={() => {
-            setCurrState(DURING);
+            if (currState === BEFORE) setCurrState(DURING);
+            else {
+              setMaleProposalIndex(
+                (maleProposalIndex + 1) % nodeCountPerGender
+              );
+            }
           }}
         >
           {currState === BEFORE ? "Start" : "Next Iteration"}

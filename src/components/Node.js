@@ -5,7 +5,6 @@ export default class Node {
     this.x = x;
     this.y = y;
     this.partner = null;
-    this.proposals = [];
   }
 
   getX() {
@@ -14,14 +13,6 @@ export default class Node {
 
   getY() {
     return this.y;
-  }
-
-  addToProposals(id) {
-    this.proposals.push(id);
-  }
-
-  getProposals() {
-    return this.proposals;
   }
 
   setId(id) {
@@ -53,6 +44,10 @@ export default class Node {
         if (i > idIndex && isFemale) this.prefList[i].crossOut();
       }
     }
+  }
+
+  setPrefList(prefList) {
+    this.prefList = prefList;
   }
 
   getPrefList() {

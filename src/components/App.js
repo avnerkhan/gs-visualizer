@@ -9,8 +9,10 @@ const App = () => {
   const boxWidth = nodeDiameter / 2;
   const boxDivision = boxWidth * 1.2;
   const nodeDivision = nodeDiameter * 2;
+  const [MAIN, EDIT] = [0, 1];
   const [BEFORE, DURING] = [0, 1];
   const [currState, setCurrState] = useState(BEFORE);
+  const [currPage, setCurrPage] = useState(MAIN);
   const [nodeCountPerGender, setNodeCountPerGender] = useState(6);
   const [maleProposalIndex, setMaleProposalIndex] = useState(0);
   const [males, setMales] = useState([]);
@@ -159,9 +161,10 @@ const App = () => {
     drawState(p5);
   };
 
-  return (
-    <div className="App">
-      <header className="App-header">
+  const showMain = () => {
+    return (
+      <div>
+        <div onClick={() => setCurrPage(EDIT)}>To Edit</div>
         <div
           onClick={() => {
             if (currState === BEFORE) setCurrState(DURING);
@@ -178,6 +181,23 @@ const App = () => {
           setup={(p5, parent) => setupSketch(p5, parent)}
           draw={p5 => drawSketch(p5)}
         />
+      </div>
+    );
+  };
+
+  const showEdit = () => {
+    return (
+      <div>
+        <div onClick={() => setCurrPage(MAIN)}>Back to main page</div>
+        <div>Edit page</div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="App">
+      <header className="App-header">
+        {currPage === MAIN ? showMain() : showEdit()}
       </header>
     </div>
   );

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Sketch from "react-p5";
 import Node from "./Node";
 import ListEntry from "./ListEntry";
+import { ListGroup } from "react-bootstrap";
 import "../css/App.css";
 
 const App = () => {
@@ -17,6 +18,7 @@ const App = () => {
   const [maleProposalIndex, setMaleProposalIndex] = useState(0);
   const [males, setMales] = useState([]);
   const [females, setFemales] = useState([]);
+  const idBank = ["A", "B", "C", "D", "E", "F"];
 
   const setupSketch = (p5, parent) => {
     const width = window.screen.width / 1.1;
@@ -26,7 +28,7 @@ const App = () => {
 
   const createBasicPrefList = () => {
     return Array.from(new Array(nodeCountPerGender), (x, i) => i).map(
-      index => new ListEntry(index)
+      index => new ListEntry(idBank[index])
     );
   };
 
@@ -38,12 +40,17 @@ const App = () => {
     const femaleXAxis = (3 * width) / 4;
     for (let i = 0; i < nodeCountPerGender; i++) {
       maleList.push(
-        new Node(i, createBasicPrefList(), maleXAxis, currentHeightOfNode)
+        new Node(
+          idBank[i],
+          createBasicPrefList(),
+          maleXAxis,
+          currentHeightOfNode
+        )
       );
       let reversedPrefList = createBasicPrefList();
       reversedPrefList.reverse();
       femaleList.push(
-        new Node(i, reversedPrefList, femaleXAxis, currentHeightOfNode)
+        new Node(idBank[i], reversedPrefList, femaleXAxis, currentHeightOfNode)
       );
       currentHeightOfNode += nodeDivision;
     }
@@ -185,11 +192,40 @@ const App = () => {
     );
   };
 
+  const showNodeCountSelection = () => {
+    return (
+      <ListGroup horizontal>
+        {[2, 3, 4, 5, 6].map(num => (
+          <ListGroup.Item
+            onClick={() => {
+              setMales([]);
+              setFemales([]);
+              setNodeCountPerGender(num);
+            }}
+            style={{ color: "black" }}
+            active={nodeCountPerGender === num}
+          >
+            {num}
+          </ListGroup.Item>
+        ))}
+      </ListGroup>
+    );
+  };
+
+  const showEditPreferenceLists = gender => {
+    return <div></div>;
+  };
+
   const showEdit = () => {
     return (
       <div>
         <div onClick={() => setCurrPage(MAIN)}>Back to main page</div>
-        <div>Edit page</div>
+        <div>Select Node Count Per Gender</div>
+        {showNodeCountSelection()}
+        <div>Edit Male Preference Lists</div>
+        {showEditPreferenceLists(males)}
+        <div>Edit Female Preference Lists</div>
+        {showEditPreferenceLists(females)}
       </div>
     );
   };

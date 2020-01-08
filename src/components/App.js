@@ -22,6 +22,8 @@ const App = () => {
   const [maleProposalIndex, setMaleProposalIndex] = useState(0);
   const [males, setMales] = useState([]);
   const [females, setFemales] = useState([]);
+  const [defaultMales, setDefaultMales] = useState([]);
+  const [defaultFemales, setDefaultFemales] = useState([]);
   const idBank = ["A", "B", "C", "D", "E", "F"];
 
   const setupSketch = (p5, parent) => {
@@ -31,7 +33,7 @@ const App = () => {
   };
 
   const createBasicPrefList = () => {
-    return Array.from(new Array(nodeCountPerGender), (x, i) => i).map(
+    return Array.from(new Array(6), (_, i) => i).map(
       index => new ListEntry(idBank[index])
     );
   };
@@ -58,6 +60,9 @@ const App = () => {
       );
       currentHeightOfNode += nodeDivision;
     }
+    if (defaultMales.length === 0) setDefaultMales([...maleList]);
+    if (defaultFemales.length === 0) setDefaultFemales([...femaleList]);
+    console.log(defaultMales);
     setMales(maleList);
     setFemales(femaleList);
   };
@@ -178,8 +183,9 @@ const App = () => {
       <div>
         <div
           onClick={() => {
-            setEditMalePrefList(males);
-            setEditFemalePrefList(females);
+            console.log(defaultMales);
+            setEditMalePrefList(defaultMales);
+            setEditFemalePrefList(defaultFemales);
             setCurrPage(EDIT);
           }}
         >
@@ -205,12 +211,23 @@ const App = () => {
     );
   };
 
+  const createDefault = (list, gender) => {
+    let idBankCopy = idBank;
+    if (gender === FEMALE) idBankCopy.reverse();
+    return list.map(entry => {
+      entry.setPrefList(idBankCopy.map(id => new ListEntry(id)));
+      return entry;
+    });
+  };
+
   const showNodeCountSelection = () => {
     return (
       <ListGroup horizontal>
         {[2, 3, 4, 5, 6].map(num => (
           <ListGroup.Item
             onClick={() => {
+              setEditMalePrefList(createDefault(editMalePrefList, MALE));
+              setEditFemalePrefList(createDefault(editFemalePrefList, FEMALE));
               setEditNodeCount(num);
             }}
             style={{ color: "black" }}
@@ -232,12 +249,12 @@ const App = () => {
     prefList[indexToSwap] = temp;
     peopleList[personIndex].setPrefList(prefList);
     if (gender === MALE) {
-      setEditMalePrefList([]);
       setEditMalePrefList(peopleList);
     } else {
-      setEditFemalePrefList([]);
       setEditFemalePrefList(peopleList);
     }
+    setMales([]);
+    setFemales([]);
   };
 
   const showEditPreferenceLists = (people, gender) => {
@@ -249,7 +266,7 @@ const App = () => {
       return (
         <Row>
           <Col>{person.getId()}</Col>
-          <Col>
+          <Col md="auto">
             <Row>
               {person
                 .getPrefList()

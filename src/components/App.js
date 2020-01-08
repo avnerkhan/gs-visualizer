@@ -15,6 +15,9 @@ const App = () => {
   const [currState, setCurrState] = useState(BEFORE);
   const [currPage, setCurrPage] = useState(MAIN);
   const [nodeCountPerGender, setNodeCountPerGender] = useState(6);
+  const [editNodeCount, setEditNodeCount] = useState(nodeCountPerGender);
+  const [editMalePrefList, setEditMalePrefList] = useState([]);
+  const [editFemalePrefList, setEditFemalePrefList] = useState([]);
   const [maleProposalIndex, setMaleProposalIndex] = useState(0);
   const [males, setMales] = useState([]);
   const [females, setFemales] = useState([]);
@@ -171,7 +174,15 @@ const App = () => {
   const showMain = () => {
     return (
       <div>
-        <div onClick={() => setCurrPage(EDIT)}>To Edit</div>
+        <div
+          onClick={() => {
+            setEditMalePrefList(males);
+            setEditFemalePrefList(females);
+            setCurrPage(EDIT);
+          }}
+        >
+          To Edit
+        </div>
         <div
           onClick={() => {
             if (currState === BEFORE) setCurrState(DURING);
@@ -198,12 +209,17 @@ const App = () => {
         {[2, 3, 4, 5, 6].map(num => (
           <ListGroup.Item
             onClick={() => {
-              setMales([]);
-              setFemales([]);
-              setNodeCountPerGender(num);
+              // TODO: Fix to make more dynamic and correct when editing
+              // setEditMalePrefList(
+              //   editMalePrefList.filter((male, index) => index < num)
+              // );
+              // setEditFemalePrefList(
+              //   editFemalePrefList.filter((female, index) => index < num)
+              // );
+              setEditNodeCount(num);
             }}
             style={{ color: "black" }}
-            active={nodeCountPerGender === num}
+            active={editNodeCount === num}
           >
             {num}
           </ListGroup.Item>
@@ -215,10 +231,9 @@ const App = () => {
   const changePrefId = (person, pref, numIndex) => {};
 
   const showEditPreferenceLists = gender => {
-    const numArr = Array.from(new Array(nodeCountPerGender), (x, i) => i).map(
+    const numArr = Array.from(new Array(editNodeCount), (x, i) => i).map(
       index => index + 1
     );
-    debugger;
     return gender.map(person => {
       return (
         <Row>
@@ -255,13 +270,22 @@ const App = () => {
   const showEdit = () => {
     return (
       <div>
-        <div onClick={() => setCurrPage(MAIN)}>Back to main page</div>
+        <div
+          onClick={() => {
+            setMales([]);
+            setFemales([]);
+            setNodeCountPerGender(editNodeCount);
+            setCurrPage(MAIN);
+          }}
+        >
+          Back to main page
+        </div>
         <div>Select Node Count Per Gender</div>
         {showNodeCountSelection()}
         <div>Edit Male Preference Lists</div>
-        {showEditPreferenceLists(males)}
+        {showEditPreferenceLists(editMalePrefList)}
         <div>Edit Female Preference Lists</div>
-        {showEditPreferenceLists(females)}
+        {showEditPreferenceLists(editFemalePrefList)}
       </div>
     );
   };

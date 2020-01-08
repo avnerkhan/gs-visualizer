@@ -9,7 +9,7 @@ const App = () => {
   const boxWidth = nodeDiameter / 2;
   const boxDivision = boxWidth * 1.2;
   const nodeDivision = nodeDiameter * 2;
-  const [BEFORE, DURING, AFTER] = [0, 1, 2];
+  const [BEFORE, DURING] = [0, 1];
   const [currState, setCurrState] = useState(BEFORE);
   const [nodeCountPerGender, setNodeCountPerGender] = useState(6);
   const [maleProposalIndex, setMaleProposalIndex] = useState(0);

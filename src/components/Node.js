@@ -34,9 +34,7 @@ export default class Node {
 
   crossFromPrefList(id) {
     for (let i = 0; i < this.prefList.length; i++) {
-      console.log("GOT HERE TOO ");
       if (this.prefList[i].getId() === id) {
-        console.log("GOT HERE");
         this.prefList[i].setCurrentPartner(false);
         this.prefList[i].crossOut();
         break;

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Sketch from "react-p5";
 import Node from "./Node";
 import ListEntry from "./ListEntry";
-import { ListGroup } from "react-bootstrap";
+import { ListGroup, Row, Col } from "react-bootstrap";
 import "../css/App.css";
 
 const App = () => {
@@ -212,8 +212,44 @@ const App = () => {
     );
   };
 
+  const changePrefId = (person, pref, numIndex) => {};
+
   const showEditPreferenceLists = gender => {
-    return <div></div>;
+    const numArr = Array.from(new Array(nodeCountPerGender), (x, i) => i).map(
+      index => index + 1
+    );
+    debugger;
+    return gender.map(person => {
+      return (
+        <Row>
+          <Col>{person.getId()}</Col>
+          <Col>
+            <Row>
+              {person.getPrefList().map((pref, index) => {
+                return (
+                  <div>
+                    <div>{pref.getId()}</div>
+                    <ListGroup>
+                      {numArr.map(numIndex => {
+                        return (
+                          <ListGroup.Item
+                            active={numIndex === index + 1}
+                            onClick={() => changePrefId(person, pref, numIndex)}
+                            style={{ color: "black" }}
+                          >
+                            {numIndex}
+                          </ListGroup.Item>
+                        );
+                      })}
+                    </ListGroup>
+                  </div>
+                );
+              })}
+            </Row>
+          </Col>
+        </Row>
+      );
+    });
   };
 
   const showEdit = () => {

@@ -91,13 +91,15 @@ const App = () => {
       if (female.getId() === proposalId) {
         if (
           female.getPartner() === null ||
-          female.getRankInList(maleProposer) <
+          female.getRankInList(maleProposer) <=
             female.getRankInList(female.getPartner())
         ) {
           female.setPartner(maleProposer);
+          female.setAsCurrentPartnerInList(maleProposer.getId());
           setFemales(currentFemales);
+          return female;
         }
-        return female;
+        return null;
       }
     }
   };
@@ -106,11 +108,15 @@ const App = () => {
     if (males.length > 0 && females.length > 0) {
       let currentMales = males;
       const proposingMale = currentMales[maleProposalIndex];
-      const proposedFemaleEntry = proposingMale.getFirstAvailable();
-      const proposedFemale = findAndSetProposal(
-        proposingMale,
-        proposedFemaleEntry.id
-      );
+      let proposedFemaleId = proposingMale.getFirstAvailablePref();
+      let proposedFemale = findAndSetProposal(proposingMale, proposedFemaleId);
+      while (proposedFemale === null) {
+        proposingMale.crossFromPrefList(proposedFemaleId);
+        proposedFemaleId = proposingMale.getFirstAvailablePref();
+        proposedFemale = findAndSetProposal(proposingMale, proposedFemaleId);
+      }
+      proposingMale.setPartner(proposedFemale);
+      proposingMale.setAsCurrentPartnerInList(proposedFemaleId, false);
       p5.fill(p5.color("black"));
       p5.line(
         proposingMale.getX(),

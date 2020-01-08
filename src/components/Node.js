@@ -33,15 +33,18 @@ export default class Node {
   }
 
   crossFromPrefList(id) {
-    for (let i = 0; i < this.prefList.size; i++) {
+    for (let i = 0; i < this.prefList.length; i++) {
+      console.log("GOT HERE TOO ");
       if (this.prefList[i].getId() === id) {
+        console.log("GOT HERE");
+        this.prefList[i].setCurrentPartner(false);
         this.prefList[i].crossOut();
         break;
       }
     }
   }
 
-  setAsCurrentPartnerInList(id) {
+  setAsCurrentPartnerInList(id, isFemale = true) {
     let idIndex;
     for (let i = 0; i < this.prefList.length; i++) {
       if (this.prefList[i].getId() === id) {
@@ -49,7 +52,7 @@ export default class Node {
         idIndex = i;
       } else {
         this.prefList[i].setCurrentPartner(false);
-        if (i > idIndex) this.prefList[i].crossOut();
+        if (i > idIndex && isFemale) this.prefList[i].crossOut();
       }
     }
   }
@@ -67,15 +70,13 @@ export default class Node {
   // Pretty much a female only method
   setPartner(partner) {
     this.partner = partner;
-    this.setAsCurrentPartnerInList(this.partner.id);
   }
 
   // Male only method
-  getFirstAvailable() {
+  getFirstAvailablePref() {
     for (let pref of this.prefList) {
       if (!pref.isCrossedOut()) {
-        pref.setCurrentPartner(true);
-        return pref;
+        return pref.getId();
       }
     }
   }

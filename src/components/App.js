@@ -10,6 +10,7 @@ const App = () => {
   const boxWidth = nodeDiameter / 2;
   const boxDivision = boxWidth * 1.2;
   const nodeDivision = nodeDiameter * 2;
+  const [MALE, FEMALE] = [0, 1];
   const [MAIN, EDIT] = [0, 1];
   const [BEFORE, DURING] = [0, 1];
   const [currState, setCurrState] = useState(BEFORE);
@@ -114,6 +115,7 @@ const App = () => {
         return null;
       }
     }
+    return null;
   };
 
   const setProposalStatus = p5 => {
@@ -209,13 +211,6 @@ const App = () => {
         {[2, 3, 4, 5, 6].map(num => (
           <ListGroup.Item
             onClick={() => {
-              // TODO: Fix to make more dynamic and correct when editing
-              // setEditMalePrefList(
-              //   editMalePrefList.filter((male, index) => index < num)
-              // );
-              // setEditFemalePrefList(
-              //   editFemalePrefList.filter((female, index) => index < num)
-              // );
               setEditNodeCount(num);
             }}
             style={{ color: "black" }}
@@ -228,38 +223,78 @@ const App = () => {
     );
   };
 
-  const changePrefId = (person, pref, numIndex) => {};
+  const swapPrefId = (personIndex, index, indexToSwap, gender) => {
+    let peopleList = gender === MALE ? editMalePrefList : editFemalePrefList;
+    console.log(peopleList);
+    let prefList = peopleList[personIndex].getPrefList();
+    const temp = prefList[index];
+    prefList[index] = prefList[indexToSwap];
+    prefList[indexToSwap] = temp;
+    peopleList[personIndex].setPrefList(prefList);
+    if (gender === MALE) {
+      setEditMalePrefList([]);
+      setEditMalePrefList(peopleList);
+    } else {
+      setEditFemalePrefList([]);
+      setEditFemalePrefList(peopleList);
+    }
+  };
 
-  const showEditPreferenceLists = gender => {
-    const numArr = Array.from(new Array(editNodeCount), (x, i) => i).map(
+  const showEditPreferenceLists = (people, gender) => {
+    const numArr = Array.from(new Array(editNodeCount), (_, i) => i).map(
       index => index + 1
     );
-    return gender.map(person => {
+    const femaleShowAfter = 6 - editNodeCount;
+    return people.map((person, personIndex) => {
       return (
         <Row>
           <Col>{person.getId()}</Col>
           <Col>
             <Row>
-              {person.getPrefList().map((pref, index) => {
-                return (
-                  <div>
-                    <div>{pref.getId()}</div>
-                    <ListGroup>
-                      {numArr.map(numIndex => {
-                        return (
-                          <ListGroup.Item
-                            active={numIndex === index + 1}
-                            onClick={() => changePrefId(person, pref, numIndex)}
-                            style={{ color: "black" }}
-                          >
-                            {numIndex}
-                          </ListGroup.Item>
-                        );
-                      })}
-                    </ListGroup>
-                  </div>
-                );
-              })}
+              {person
+                .getPrefList()
+                .filter((_, index) =>
+                  gender === MALE
+                    ? index < editNodeCount
+                    : index >= femaleShowAfter
+                )
+                .map((pref, index) => {
+                  return (
+                    <div>
+                      <div>{pref.getId()}</div>
+                      <ListGroup>
+                        {numArr.map(numIndex => {
+                          const prefIndexCorrect =
+                            gender === MALE
+                              ? numIndex - 1
+                              : numIndex - 1 + femaleShowAfter;
+                          const swapIndex =
+                            gender === MALE ? index : index + femaleShowAfter;
+                          return (
+                            <ListGroup.Item
+                              active={
+                                person
+                                  .getPrefList()
+                                  [prefIndexCorrect].getId() === pref.getId()
+                              }
+                              onClick={() =>
+                                swapPrefId(
+                                  personIndex,
+                                  swapIndex,
+                                  prefIndexCorrect,
+                                  gender
+                                )
+                              }
+                              style={{ color: "black" }}
+                            >
+                              {numIndex}
+                            </ListGroup.Item>
+                          );
+                        })}
+                      </ListGroup>
+                    </div>
+                  );
+                })}
             </Row>
           </Col>
         </Row>
@@ -267,13 +302,30 @@ const App = () => {
     });
   };
 
+  const editListToNormalList = (list, gender) => {
+    return list
+      .filter((_, index) => index + 1 <= editNodeCount)
+      .map(person => {
+        person.setPrefList(
+          person
+            .getPrefList()
+            .filter((_, index) =>
+              gender === MALE
+                ? index + 1 <= editNodeCount
+                : index + 1 > 6 - editNodeCount
+            )
+        );
+        return person;
+      });
+  };
+
   const showEdit = () => {
     return (
       <div>
         <div
           onClick={() => {
-            setMales([]);
-            setFemales([]);
+            setMales(editListToNormalList(editMalePrefList, MALE));
+            setFemales(editListToNormalList(editFemalePrefList, FEMALE));
             setNodeCountPerGender(editNodeCount);
             setCurrPage(MAIN);
           }}
@@ -283,9 +335,9 @@ const App = () => {
         <div>Select Node Count Per Gender</div>
         {showNodeCountSelection()}
         <div>Edit Male Preference Lists</div>
-        {showEditPreferenceLists(editMalePrefList)}
+        {showEditPreferenceLists(editMalePrefList, MALE)}
         <div>Edit Female Preference Lists</div>
-        {showEditPreferenceLists(editFemalePrefList)}
+        {showEditPreferenceLists(editFemalePrefList, FEMALE)}
       </div>
     );
   };

@@ -58,7 +58,6 @@ export default class Node {
     for (let i = 0; i < this.prefList.length; i++) {
       if (this.prefList[i].getId() === partner.getId()) return i;
     }
-    debugger;
     throw Error("COULD NOT FIND RANK");
   }
 

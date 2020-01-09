@@ -121,8 +121,6 @@ const App = () => {
         return null;
       }
     }
-    console.log(maleProposer);
-    console.log(proposalId);
     throw new Error("NO ID FOUND");
   };
 

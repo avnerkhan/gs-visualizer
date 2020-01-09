@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Sketch from "react-p5";
 import Node from "./Node";
 import ListEntry from "./ListEntry";
@@ -226,6 +226,7 @@ const App = () => {
       <div>
         {currState !== DONE ? (
           <Button
+            style={currState === DURING ? { display: "none" } : {}}
             ref={clickRef}
             onClick={() => {
               if (timerInterval === null) {

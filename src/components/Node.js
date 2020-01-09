@@ -56,8 +56,10 @@ export default class Node {
 
   getRankInList(partner) {
     for (let i = 0; i < this.prefList.length; i++) {
-      if (this.prefList[i].getId() === partner.id) return i;
+      if (this.prefList[i].getId() === partner.getId()) return i;
     }
+    debugger;
+    throw Error("COULD NOT FIND RANK");
   }
 
   // Pretty much a female only method
@@ -72,6 +74,7 @@ export default class Node {
         return pref.getId();
       }
     }
+    throw new Error("COULD NOT GET A PREF");
   }
 
   getPartner() {

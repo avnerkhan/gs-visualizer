@@ -35,7 +35,7 @@ const App = () => {
   };
 
   const createBasicPrefList = () => {
-    return Array.from(new Array(6), (_, i) => i).map(
+    return Array.from(new Array(nodeCountPerGender), (_, i) => i).map(
       index => new ListEntry(idBank[index])
     );
   };
@@ -64,7 +64,6 @@ const App = () => {
     }
     if (defaultMales.length === 0) setDefaultMales([...maleList]);
     if (defaultFemales.length === 0) setDefaultFemales([...femaleList]);
-    console.log(defaultMales);
     setMales(maleList);
     setFemales(femaleList);
   };
@@ -122,7 +121,9 @@ const App = () => {
         return null;
       }
     }
-    return null;
+    console.log(maleProposer);
+    console.log(proposalId);
+    throw new Error("NO ID FOUND");
   };
 
   const setProposalStatus = p5 => {
@@ -200,7 +201,9 @@ const App = () => {
             onClick={() => {
               setMales([]);
               setFemales([]);
+              setMaleProposalIndex(0);
               setCurrState(BEFORE);
+              debugger;
             }}
           >
             Reset
@@ -336,9 +339,11 @@ const App = () => {
     return list
       .filter((_, index) => index + 1 <= editNodeCount)
       .map(person => {
+        person.setPartner(null);
         person.setPrefList(
           person
             .getPrefList()
+            .map(pref => new ListEntry(pref.getId()))
             .filter((_, index) =>
               gender === MALE
                 ? index + 1 <= editNodeCount
@@ -375,6 +380,7 @@ const App = () => {
           onClick={() => {
             setMales(editListToNormalList(editMalePrefList, MALE));
             setFemales(editListToNormalList(editFemalePrefList, FEMALE));
+            setMaleProposalIndex(0);
             setNodeCountPerGender(editNodeCount);
             setCurrPage(MAIN);
           }}

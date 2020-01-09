@@ -12,7 +12,7 @@ const App = () => {
   const nodeDivision = nodeDiameter * 2;
   const [MALE, FEMALE] = [0, 1];
   const [MAIN, EDIT] = [0, 1];
-  const [BEFORE, DURING] = [0, 1];
+  const [BEFORE, DURING, DONE] = [0, 1, 2];
   const [currState, setCurrState] = useState(BEFORE);
   const [currPage, setCurrPage] = useState(MAIN);
   const [nodeCountPerGender, setNodeCountPerGender] = useState(6);
@@ -195,6 +195,17 @@ const App = () => {
         >
           {currState === BEFORE ? "Start" : "Next Iteration"}
         </Button>
+        {currState === DURING || currState === DONE ? (
+          <Button
+            onClick={() => {
+              setMales([]);
+              setFemales([]);
+              setCurrState(BEFORE);
+            }}
+          >
+            Reset
+          </Button>
+        ) : null}
         {currState === BEFORE ? (
           <Button
             onClick={() => {

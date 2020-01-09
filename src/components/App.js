@@ -25,10 +25,8 @@ const App = () => {
   const [males, setMales] = useState([]);
   const [females, setFemales] = useState([]);
   const [fixedLines, setFixedLines] = useState([]);
-  const [defaultMales, setDefaultMales] = useState([]);
-  const [defaultFemales, setDefaultFemales] = useState([]);
   const [selectedMaleEdit, setSelectedMaleEdit] = useState("A");
-  const [selectedFemaleEdit, setSelectedFemaleEdit] = useState("F");
+  const [selectedFemaleEdit, setSelectedFemaleEdit] = useState("A");
   const idBank = ["A", "B", "C", "D", "E", "F"];
   const [timerInterval, setTimerInterval] = useState(null);
 
@@ -40,10 +38,19 @@ const App = () => {
     p5.createCanvas(width, height).parent(parent);
   };
 
-  const createBasicPrefList = () => {
-    return Array.from(new Array(nodeCountPerGender), (_, i) => i).map(
-      index => new ListEntry(idBank[index])
-    );
+  const createPrefList = (index, gender) => {
+    if (editMalePrefList.length === 0 && editFemalePrefList.length === 0) {
+      let defaultPrefList = Array.from(
+        new Array(nodeCountPerGender),
+        (_, i) => i
+      ).map(index => new ListEntry(idBank[index]));
+      if (gender === FEMALE) defaultPrefList.reverse();
+      return defaultPrefList;
+    } else {
+      let genderList =
+        gender === MALE ? editMalePrefList[index] : editFemalePrefList[index];
+      return genderList.getPrefList();
+    }
   };
 
   const setupStartState = (width, height) => {
@@ -56,20 +63,21 @@ const App = () => {
       maleList.push(
         new Node(
           idBank[i],
-          createBasicPrefList(),
+          createPrefList(i, MALE),
           maleXAxis,
           currentHeightOfNode
         )
       );
-      let reversedPrefList = createBasicPrefList();
-      reversedPrefList.reverse();
       femaleList.push(
-        new Node(idBank[i], reversedPrefList, femaleXAxis, currentHeightOfNode)
+        new Node(
+          idBank[i],
+          createPrefList(i, FEMALE),
+          femaleXAxis,
+          currentHeightOfNode
+        )
       );
       currentHeightOfNode += nodeDivision;
     }
-    if (defaultMales.length === 0) setDefaultMales([...maleList]);
-    if (defaultFemales.length === 0) setDefaultFemales([...femaleList]);
     setMales(maleList);
     setFemales(femaleList);
   };
@@ -257,6 +265,8 @@ const App = () => {
             onClick={() => {
               setMales([]);
               setFemales([]);
+              setEditMalePrefList([]);
+              setEditFemalePrefList([]);
               setFixedLines([]);
               setFinishedPairs([]);
               setPastMales({});
@@ -272,8 +282,9 @@ const App = () => {
         {currState === BEFORE ? (
           <Button
             onClick={() => {
-              setEditMalePrefList(defaultMales);
-              setEditFemalePrefList(defaultFemales);
+              setEditMalePrefList(males);
+              setEditFemalePrefList(females);
+              setEditNodeCount(nodeCountPerGender);
               setCurrPage(EDIT);
             }}
           >
@@ -288,12 +299,12 @@ const App = () => {
     );
   };
 
-  const createDefault = (list, gender) => {
-    let idBankCopy = idBank;
-    if (gender === FEMALE) idBankCopy.reverse();
-    return list.map(entry => {
-      entry.setPrefList(idBankCopy.map(id => new ListEntry(id)));
-      return entry;
+  const createDefault = (num, gender) => {
+    let idBankCopy = idBank.filter((_, index) => index + 1 <= num);
+    return idBankCopy.map(id => {
+      let prefList = idBankCopy.map(id => new ListEntry(id));
+      if (gender === FEMALE) prefList.reverse();
+      return new Node(id, prefList, null, null);
     });
   };
 
@@ -303,8 +314,8 @@ const App = () => {
         {[2, 3, 4, 5, 6].map(num => (
           <ListGroup.Item
             onClick={() => {
-              setEditMalePrefList(createDefault(editMalePrefList, MALE));
-              setEditFemalePrefList(createDefault(editFemalePrefList, FEMALE));
+              setEditMalePrefList(createDefault(num, MALE));
+              setEditFemalePrefList(createDefault(num, FEMALE));
               setEditNodeCount(num);
             }}
             style={{ color: "black" }}
@@ -337,81 +348,47 @@ const App = () => {
     const numArr = Array.from(new Array(editNodeCount), (_, i) => i).map(
       index => index + 1
     );
-    const femaleShowAfter = 6 - editNodeCount;
     const shownId = gender === MALE ? selectedMaleEdit : selectedFemaleEdit;
     return people.map((person, personIndex) => {
       return person.getId() === shownId ? (
         <Col>
           <Col md="auto">
             <Row>
-              {person
-                .getPrefList()
-                .filter((_, index) =>
-                  gender === MALE
-                    ? index < editNodeCount
-                    : index >= femaleShowAfter
-                )
-                .map((pref, index) => {
-                  return (
-                    <div>
-                      <div>{pref.getId()}</div>
-                      <ListGroup>
-                        {numArr.map(numIndex => {
-                          const prefIndexCorrect =
-                            gender === MALE
-                              ? numIndex - 1
-                              : numIndex - 1 + femaleShowAfter;
-                          const swapIndex =
-                            gender === MALE ? index : index + femaleShowAfter;
-                          return (
-                            <ListGroup.Item
-                              active={
-                                person
-                                  .getPrefList()
-                                  [prefIndexCorrect].getId() === pref.getId()
-                              }
-                              onClick={() =>
-                                swapPrefId(
-                                  personIndex,
-                                  swapIndex,
-                                  prefIndexCorrect,
-                                  gender
-                                )
-                              }
-                              style={{ color: "black" }}
-                            >
-                              {numIndex}
-                            </ListGroup.Item>
-                          );
-                        })}
-                      </ListGroup>
-                    </div>
-                  );
-                })}
+              {person.getPrefList().map((pref, index) => {
+                return (
+                  <div>
+                    <div>{pref.getId()}</div>
+                    <ListGroup>
+                      {numArr.map(numIndex => {
+                        return (
+                          <ListGroup.Item
+                            active={
+                              person.getPrefList()[numIndex - 1].getId() ===
+                              pref.getId()
+                            }
+                            onClick={() =>
+                              swapPrefId(
+                                personIndex,
+                                index,
+                                numIndex - 1,
+                                gender
+                              )
+                            }
+                            style={{ color: "black" }}
+                          >
+                            {numIndex}
+                          </ListGroup.Item>
+                        );
+                      })}
+                    </ListGroup>
+                  </div>
+                );
+              })}
             </Row>
           </Col>
         </Col>
       ) : null;
     });
-  };
-
-  const editListToNormalList = (list, gender) => {
-    return list
-      .filter((_, index) => index + 1 <= editNodeCount)
-      .map(person => {
-        person.setPartner(null);
-        person.setPrefList(
-          person
-            .getPrefList()
-            .map(pref => new ListEntry(pref.getId()))
-            .filter((_, index) =>
-              gender === MALE
-                ? index + 1 <= editNodeCount
-                : index + 1 > 6 - editNodeCount
-            )
-        );
-        return person;
-      });
   };
 
   const showSelectable = gender => {
@@ -438,8 +415,8 @@ const App = () => {
       <div>
         <Button
           onClick={() => {
-            setMales(editListToNormalList(editMalePrefList, MALE));
-            setFemales(editListToNormalList(editFemalePrefList, FEMALE));
+            setMales([]);
+            setFemales([]);
             setFixedLines([]);
             setPastMales({});
             setFinishedPairs([]);

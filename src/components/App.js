@@ -233,6 +233,29 @@ const App = () => {
     return partnerMap;
   };
 
+  const isInFixedLines = (male, female) => {
+    for (const combo of fixedLines) {
+      if (
+        combo.x1 === male.getX() &&
+        combo.y1 === male.getY() &&
+        combo.x2 === female.getX() &&
+        combo.y2 === female.getY()
+      )
+        return true;
+    }
+    return false;
+  };
+
+  const verifyAndFixMatching = () => {
+    for (const male of males) {
+      if (!isInFixedLines(male, male.getPartner())) {
+        setFixedLines([]);
+        return false;
+      }
+    }
+    return true;
+  };
+
   const showMain = () => {
     return (
       <div>
@@ -255,8 +278,9 @@ const App = () => {
               }
               if (currState === BEFORE) setCurrState(DURING);
               else if (currState === DURING) {
-                if (checkIfAlgorithimDone()) setCurrState(DONE);
-                else {
+                if (checkIfAlgorithimDone() && verifyAndFixMatching()) {
+                  setCurrState(DONE);
+                } else {
                   addFixedLineEligible();
                   if (maleProposalIndex >= nodeCountPerGender - 1)
                     setPastMales(getMalePartnerMap());

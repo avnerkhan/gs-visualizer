@@ -232,6 +232,8 @@ const App = () => {
   const showMain = () => {
     return (
       <div>
+        {currState === DONE ? <div>Finished Algorithim</div> : null}
+        {currState === DURING ? <div>Running Algorithim</div> : null}
         {currState !== DONE ? (
           <Button
             style={currState === DURING ? { display: "none" } : {}}

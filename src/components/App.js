@@ -367,6 +367,8 @@ const App = () => {
             onClick={() => {
               setEditMalePrefList(createDefault(num, MALE));
               setEditFemalePrefList(createDefault(num, FEMALE));
+              setSelectedMaleEdit("A");
+              setSelectedFemaleEdit("A");
               setEditNodeCount(num);
             }}
             style={{ color: "black" }}

@@ -19,9 +19,12 @@ const App = () => {
   const [editNodeCount, setEditNodeCount] = useState(nodeCountPerGender);
   const [editMalePrefList, setEditMalePrefList] = useState([]);
   const [editFemalePrefList, setEditFemalePrefList] = useState([]);
+  const [finishedPairs, setFinishedPairs] = useState([]);
   const [maleProposalIndex, setMaleProposalIndex] = useState(0);
+  const [pastMales, setPastMales] = useState({});
   const [males, setMales] = useState([]);
   const [females, setFemales] = useState([]);
+  const [fixedLines, setFixedLines] = useState([]);
   const [defaultMales, setDefaultMales] = useState([]);
   const [defaultFemales, setDefaultFemales] = useState([]);
   const [selectedMaleEdit, setSelectedMaleEdit] = useState("A");
@@ -174,34 +177,76 @@ const App = () => {
     }
   };
 
+  const checkIfAlgorithimDone = () => fixedLines.length === nodeCountPerGender;
+
   const drawSketch = p5 => {
     p5.background(0, 196, 255);
     drawState(p5);
   };
 
+  const addFixedLineEligible = () => {
+    const currentMale = males[maleProposalIndex];
+    const pastMalePartner = pastMales[currentMale.getId()];
+    let finishedPairsCopy = finishedPairs;
+    if (
+      pastMalePartner !== undefined &&
+      currentMale.getPartner().getId() === pastMalePartner &&
+      !finishedPairsCopy.includes(currentMale.getId())
+    ) {
+      finishedPairsCopy.push(currentMale.getId());
+      let currentLines = fixedLines;
+      currentLines.push({
+        x2: currentMale.getPartner().getX(),
+        y2: currentMale.getPartner().getY(),
+        x1: currentMale.getX(),
+        y1: currentMale.getY()
+      });
+      setFinishedPairs(finishedPairsCopy);
+      setFixedLines(currentLines);
+    }
+  };
+
+  const getMalePartnerMap = () => {
+    let partnerMap = {};
+    for (const male of males) {
+      partnerMap[male.getId()] = male.getPartner().getId();
+    }
+    return partnerMap;
+  };
+
   const showMain = () => {
     return (
       <div>
-        <Button
-          onClick={() => {
-            if (currState === BEFORE) setCurrState(DURING);
-            else {
-              setMaleProposalIndex(
-                (maleProposalIndex + 1) % nodeCountPerGender
-              );
-            }
-          }}
-        >
-          {currState === BEFORE ? "Start" : "Next Iteration"}
-        </Button>
+        {currState !== DONE ? (
+          <Button
+            onClick={() => {
+              if (currState === BEFORE) setCurrState(DURING);
+              else if (currState === DURING) {
+                if (checkIfAlgorithimDone()) setCurrState(DONE);
+                else {
+                  addFixedLineEligible();
+                  if (maleProposalIndex >= nodeCountPerGender - 1)
+                    setPastMales(getMalePartnerMap());
+                  setMaleProposalIndex(
+                    (maleProposalIndex + 1) % nodeCountPerGender
+                  );
+                }
+              }
+            }}
+          >
+            {currState === BEFORE ? "Start" : "Next Iteration"}
+          </Button>
+        ) : null}
         {currState === DURING || currState === DONE ? (
           <Button
             onClick={() => {
               setMales([]);
               setFemales([]);
+              setFixedLines([]);
+              setFinishedPairs([]);
+              setPastMales({});
               setMaleProposalIndex(0);
               setCurrState(BEFORE);
-              debugger;
             }}
           >
             Reset
@@ -378,6 +423,9 @@ const App = () => {
           onClick={() => {
             setMales(editListToNormalList(editMalePrefList, MALE));
             setFemales(editListToNormalList(editFemalePrefList, FEMALE));
+            setFixedLines([]);
+            setPastMales({});
+            setFinishedPairs([]);
             setMaleProposalIndex(0);
             setNodeCountPerGender(editNodeCount);
             setCurrPage(MAIN);

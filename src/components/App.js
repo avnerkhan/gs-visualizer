@@ -175,6 +175,10 @@ const App = () => {
       drawPrefList(p5, femaleNode, false);
       drawNode(p5, femaleNode);
     }
+
+    for (const permaLine of fixedLines) {
+      p5.line(permaLine.x1, permaLine.y1, permaLine.x2, permaLine.y2);
+    }
   };
 
   const checkIfAlgorithimDone = () => fixedLines.length === nodeCountPerGender;

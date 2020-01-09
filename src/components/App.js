@@ -3,6 +3,8 @@ import Sketch from "react-p5";
 import Node from "./Node";
 import ListEntry from "./ListEntry";
 import { ListGroup, Row, Col, Button } from "react-bootstrap";
+import "rc-slider/assets/index.css";
+import Slider from "rc-slider";
 import "../css/App.css";
 
 const App = () => {
@@ -27,8 +29,10 @@ const App = () => {
   const [fixedLines, setFixedLines] = useState([]);
   const [selectedMaleEdit, setSelectedMaleEdit] = useState("A");
   const [selectedFemaleEdit, setSelectedFemaleEdit] = useState("A");
-  const idBank = ["A", "B", "C", "D", "E", "F"];
   const [timerInterval, setTimerInterval] = useState(null);
+  const [callbackTime, setCallbackTime] = useState(1000);
+  const [resumeShown, setResumeShown] = useState(false);
+  const idBank = ["A", "B", "C", "D", "E", "F"];
 
   const clickRef = React.useRef(null);
 
@@ -236,11 +240,17 @@ const App = () => {
         {currState === DURING ? <div>Running Algorithim</div> : null}
         {currState !== DONE ? (
           <Button
-            style={currState === DURING ? { display: "none" } : {}}
+            style={
+              currState === DURING && !resumeShown ? { display: "none" } : {}
+            }
             ref={clickRef}
             onClick={() => {
+              setResumeShown(false);
               if (timerInterval === null) {
-                const timer = setInterval(() => clickRef.current.click(), 200);
+                const timer = setInterval(
+                  () => clickRef.current.click(),
+                  callbackTime
+                );
                 setTimerInterval(timer);
               }
               if (currState === BEFORE) setCurrState(DURING);
@@ -257,7 +267,7 @@ const App = () => {
               }
             }}
           >
-            {currState === BEFORE ? "Start" : "Next Iteration"}
+            {currState === BEFORE ? "Start" : "Resume"}
           </Button>
         ) : (
           clearInterval(timerInterval)
@@ -273,8 +283,10 @@ const App = () => {
               setFinishedPairs([]);
               setPastMales({});
               setMaleProposalIndex(0);
+              setCallbackTime(1000);
               clearInterval(timerInterval);
               setTimerInterval(null);
+              setResumeShown(false);
               setCurrState(BEFORE);
             }}
           >
@@ -292,6 +304,19 @@ const App = () => {
           >
             To Edit
           </Button>
+        ) : null}
+        {currState === DURING ? (
+          <Slider
+            onBeforeChange={() => {
+              clearInterval(timerInterval);
+              setTimerInterval(null);
+              setResumeShown(true);
+            }}
+            onAfterChange={value => {
+              const time = 1000 - value * 9;
+              setCallbackTime(time);
+            }}
+          />
         ) : null}
         <Sketch
           setup={(p5, parent) => setupSketch(p5, parent)}
@@ -422,7 +447,9 @@ const App = () => {
             setFixedLines([]);
             setPastMales({});
             setFinishedPairs([]);
+            setCallbackTime(1000);
             setMaleProposalIndex(0);
+            setResumeShown(false);
             setNodeCountPerGender(editNodeCount);
             setCurrPage(MAIN);
           }}

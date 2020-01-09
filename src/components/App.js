@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Sketch from "react-p5";
 import Node from "./Node";
 import ListEntry from "./ListEntry";
-import { ListGroup, Row, Col } from "react-bootstrap";
+import { ListGroup, Row, Col, Button } from "react-bootstrap";
 import "../css/App.css";
 
 const App = () => {
@@ -181,17 +181,7 @@ const App = () => {
   const showMain = () => {
     return (
       <div>
-        <div
-          onClick={() => {
-            console.log(defaultMales);
-            setEditMalePrefList(defaultMales);
-            setEditFemalePrefList(defaultFemales);
-            setCurrPage(EDIT);
-          }}
-        >
-          To Edit
-        </div>
-        <div
+        <Button
           onClick={() => {
             if (currState === BEFORE) setCurrState(DURING);
             else {
@@ -202,7 +192,18 @@ const App = () => {
           }}
         >
           {currState === BEFORE ? "Start" : "Next Iteration"}
-        </div>
+        </Button>
+        {currState === BEFORE ? (
+          <Button
+            onClick={() => {
+              setEditMalePrefList(defaultMales);
+              setEditFemalePrefList(defaultFemales);
+              setCurrPage(EDIT);
+            }}
+          >
+            To Edit
+          </Button>
+        ) : null}
         <Sketch
           setup={(p5, parent) => setupSketch(p5, parent)}
           draw={p5 => drawSketch(p5)}
@@ -264,7 +265,7 @@ const App = () => {
     const femaleShowAfter = 6 - editNodeCount;
     return people.map((person, personIndex) => {
       return (
-        <Row>
+        <Col>
           <Col>{person.getId()}</Col>
           <Col md="auto">
             <Row>
@@ -314,7 +315,7 @@ const App = () => {
                 })}
             </Row>
           </Col>
-        </Row>
+        </Col>
       );
     });
   };
@@ -339,7 +340,7 @@ const App = () => {
   const showEdit = () => {
     return (
       <div>
-        <div
+        <Button
           onClick={() => {
             setMales(editListToNormalList(editMalePrefList, MALE));
             setFemales(editListToNormalList(editFemalePrefList, FEMALE));
@@ -348,13 +349,13 @@ const App = () => {
           }}
         >
           Back to main page
-        </div>
+        </Button>
         <div>Select Node Count Per Gender</div>
-        {showNodeCountSelection()}
+        <Row>{showNodeCountSelection()}</Row>
         <div>Edit Male Preference Lists</div>
-        {showEditPreferenceLists(editMalePrefList, MALE)}
+        <Row>{showEditPreferenceLists(editMalePrefList, MALE)}</Row>
         <div>Edit Female Preference Lists</div>
-        {showEditPreferenceLists(editFemalePrefList, FEMALE)}
+        <Row>{showEditPreferenceLists(editFemalePrefList, FEMALE)}</Row>
       </div>
     );
   };

@@ -24,6 +24,8 @@ const App = () => {
   const [females, setFemales] = useState([]);
   const [defaultMales, setDefaultMales] = useState([]);
   const [defaultFemales, setDefaultFemales] = useState([]);
+  const [selectedMaleEdit, setSelectedMaleEdit] = useState("A");
+  const [selectedFemaleEdit, setSelectedFemaleEdit] = useState("F");
   const idBank = ["A", "B", "C", "D", "E", "F"];
 
   const setupSketch = (p5, parent) => {
@@ -243,7 +245,6 @@ const App = () => {
 
   const swapPrefId = (personIndex, index, indexToSwap, gender) => {
     let peopleList = gender === MALE ? editMalePrefList : editFemalePrefList;
-    console.log(peopleList);
     let prefList = peopleList[personIndex].getPrefList();
     const temp = prefList[index];
     prefList[index] = prefList[indexToSwap];
@@ -263,10 +264,10 @@ const App = () => {
       index => index + 1
     );
     const femaleShowAfter = 6 - editNodeCount;
+    const shownId = gender === MALE ? selectedMaleEdit : selectedFemaleEdit;
     return people.map((person, personIndex) => {
-      return (
+      return person.getId() === shownId ? (
         <Col>
-          <Col>{person.getId()}</Col>
           <Col md="auto">
             <Row>
               {person
@@ -316,7 +317,7 @@ const App = () => {
             </Row>
           </Col>
         </Col>
-      );
+      ) : null;
     });
   };
 
@@ -337,6 +338,25 @@ const App = () => {
       });
   };
 
+  const showSelectable = gender => {
+    return (
+      <select
+        value={gender === MALE ? selectedMaleEdit : selectedFemaleEdit}
+        onChange={e =>
+          gender === MALE
+            ? setSelectedMaleEdit(e.target.value)
+            : setSelectedFemaleEdit(e.target.value)
+        }
+      >
+        {idBank
+          .filter((_, index) => index + 1 <= editNodeCount)
+          .map(value => (
+            <option value={value}>{value}</option>
+          ))}
+      </select>
+    );
+  };
+
   const showEdit = () => {
     return (
       <div>
@@ -351,11 +371,13 @@ const App = () => {
           Back to main page
         </Button>
         <div>Select Node Count Per Gender</div>
-        <Row>{showNodeCountSelection()}</Row>
+        {showNodeCountSelection()}
         <div>Edit Male Preference Lists</div>
-        <Row>{showEditPreferenceLists(editMalePrefList, MALE)}</Row>
+        {showSelectable(MALE)}
+        {showEditPreferenceLists(editMalePrefList, MALE)}
         <div>Edit Female Preference Lists</div>
-        <Row>{showEditPreferenceLists(editFemalePrefList, FEMALE)}</Row>
+        {showSelectable(FEMALE)}
+        {showEditPreferenceLists(editFemalePrefList, FEMALE)}
       </div>
     );
   };

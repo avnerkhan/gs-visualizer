@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Sketch from "react-p5";
 import Node from "./Node";
 import ListEntry from "./ListEntry";
@@ -30,6 +30,9 @@ const App = () => {
   const [selectedMaleEdit, setSelectedMaleEdit] = useState("A");
   const [selectedFemaleEdit, setSelectedFemaleEdit] = useState("F");
   const idBank = ["A", "B", "C", "D", "E", "F"];
+  const [timerInterval, setTimerInterval] = useState(null);
+
+  const clickRef = React.useRef(null);
 
   const setupSketch = (p5, parent) => {
     const width = window.screen.width / 1.1;
@@ -223,7 +226,12 @@ const App = () => {
       <div>
         {currState !== DONE ? (
           <Button
+            ref={clickRef}
             onClick={() => {
+              if (timerInterval === null) {
+                const timer = setInterval(() => clickRef.current.click(), 200);
+                setTimerInterval(timer);
+              }
               if (currState === BEFORE) setCurrState(DURING);
               else if (currState === DURING) {
                 if (checkIfAlgorithimDone()) setCurrState(DONE);
@@ -240,7 +248,9 @@ const App = () => {
           >
             {currState === BEFORE ? "Start" : "Next Iteration"}
           </Button>
-        ) : null}
+        ) : (
+          clearInterval(timerInterval)
+        )}
         {currState === DURING || currState === DONE ? (
           <Button
             onClick={() => {
@@ -250,6 +260,8 @@ const App = () => {
               setFinishedPairs([]);
               setPastMales({});
               setMaleProposalIndex(0);
+              clearInterval(timerInterval);
+              setTimerInterval(null);
               setCurrState(BEFORE);
             }}
           >

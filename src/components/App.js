@@ -261,6 +261,7 @@ const App = () => {
       <div>
         {currState === DONE ? <div>Finished Algorithim</div> : null}
         {currState === DURING ? <div>Running Algorithim</div> : null}
+        {currState === BEFORE ? <div>Welcome to GS-Algorithim</div> : null}
         {currState !== DONE ? (
           <Button
             style={
